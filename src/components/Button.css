@@ -1,0 +1,73 @@
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    gap: 8px;
+  }
+  
+  .button-primary {
+    background-color: #1db954;
+    color: #000;
+  }
+  
+  .button-primary:hover:not(.button-disabled) {
+    background-color: #1ed760;
+  }
+  
+  .button-outline {
+    background-color: transparent;
+    border: 1px solid #1db954;
+    color: #1db954;
+  }
+  
+  .button-outline:hover:not(.button-disabled) {
+    background-color: rgba(29, 185, 84, 0.1);
+  }
+  
+  .button-ghost {
+    background-color: transparent;
+    color: #fff;
+  }
+  
+  .button-ghost:hover:not(.button-disabled) {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .button-small {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+  
+  .button-medium {
+    height: 40px;
+    padding: 0 16px;
+    font-size: 16px;
+  }
+  
+  .button-large {
+    height: 56px;
+    padding: 0 24px;
+    font-size: 18px;
+  }
+  
+  .button-icon {
+    display: flex;
+    align-items: center;
+  }
+  
+  .button-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .button-full {
+    width: 100%;
+  }
+  
+  
