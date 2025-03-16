@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/perfume-survey/static/css/main.79f3193a.css",
+    "main.js": "/perfume-survey/static/js/main.7d003579.js",
+    "index.html": "/perfume-survey/index.html",
+    "main.79f3193a.css.map": "/perfume-survey/static/css/main.79f3193a.css.map",
+    "main.7d003579.js.map": "/perfume-survey/static/js/main.7d003579.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.79f3193a.css",
+    "static/js/main.7d003579.js"
+  ]
+}
