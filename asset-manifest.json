@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/perfume-survey/static/css/main.bd06f682.css",
-    "main.js": "/perfume-survey/static/js/main.229edef2.js",
+    "main.css": "/perfume-survey/static/css/main.22469ed4.css",
+    "main.js": "/perfume-survey/static/js/main.6d4869c7.js",
     "index.html": "/perfume-survey/index.html",
-    "main.bd06f682.css.map": "/perfume-survey/static/css/main.bd06f682.css.map",
-    "main.229edef2.js.map": "/perfume-survey/static/js/main.229edef2.js.map"
+    "main.22469ed4.css.map": "/perfume-survey/static/css/main.22469ed4.css.map",
+    "main.6d4869c7.js.map": "/perfume-survey/static/js/main.6d4869c7.js.map"
   },
   "entrypoints": [
-    "static/css/main.bd06f682.css",
-    "static/js/main.229edef2.js"
+    "static/css/main.22469ed4.css",
+    "static/js/main.6d4869c7.js"
   ]
 }
