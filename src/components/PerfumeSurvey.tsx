@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./PerfumeSurvey.css";
 import { perfumes, type Perfume } from "../data/perfumeData";
 import { useMobile } from "../hooks/useMobile";
@@ -12,9 +12,11 @@ import {
   SearchIcon,
   PlusIcon,
   XIcon,
+  InfoIcon,
   ArrowRightIcon,
   ThumbsUpIcon,
   ThumbsDownIcon,
+  HelpCircleIcon,
 } from "../icons/Icons";
 
 interface CustomPerfume {
@@ -24,6 +26,13 @@ interface CustomPerfume {
 }
 
 type SurveyStep = "intro" | "selection" | "complete";
+type GuideStep =
+  | "welcome"
+  | "search"
+  | "select"
+  | "reorder"
+  | "submit"
+  | "none";
 
 const PerfumeSurvey: React.FC = () => {
   const [step, setStep] = useState<SurveyStep>("intro");
@@ -33,8 +42,28 @@ const PerfumeSurvey: React.FC = () => {
   const [newCustomPerfume, setNewCustomPerfume] = useState<string>("");
   const [wouldBuyDecants, setWouldBuyDecants] = useState<boolean | null>(null);
   const [showAddCustom, setShowAddCustom] = useState<boolean>(false);
+  const [guideStep, setGuideStep] = useState<GuideStep>("welcome");
+  const [showHelp, setShowHelp] = useState<boolean>(false);
   const isMobile = useMobile();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // Actualizar el paso de guía basado en las acciones del usuario
+  useEffect(() => {
+    if (step === "selection") {
+      if (selectedPerfumes.length === 0) {
+        setGuideStep("welcome");
+      } else if (selectedPerfumes.length === 1) {
+        setGuideStep("select");
+      } else if (selectedPerfumes.length >= 2) {
+        setGuideStep("reorder");
+      }
+
+      if (selectedPerfumes.length === 3) {
+        setGuideStep("submit");
+      }
+    }
+  }, [selectedPerfumes.length, step]);
 
   // Filtrar perfumes basados en la búsqueda
   const filteredPerfumes = perfumes.filter(
@@ -57,8 +86,32 @@ const PerfumeSurvey: React.FC = () => {
 
   const noResults = searchQuery.length > 0 && filteredPerfumes.length === 0;
 
-  // Manejar selección de perfume
+  // Modificar la función handleSelectPerfume para añadir un efecto visual al hacer clic
   const handleSelectPerfume = (id: string) => {
+    // Crear efecto visual de clic
+    const addClickEffect = (element: HTMLElement) => {
+      // Crear el elemento de efecto
+      const ripple = document.createElement("span");
+      ripple.className = "ripple-effect";
+      element.appendChild(ripple);
+
+      // Calcular posición y tamaño
+      const rect = element.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = `${size}px`;
+
+      // Eliminar después de la animación
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    };
+
+    // Encontrar el elemento de la tarjeta y aplicar el efecto
+    const cardElement = document.getElementById(`perfume-card-${id}`);
+    if (cardElement) {
+      addClickEffect(cardElement);
+    }
+
     if (selectedPerfumes.includes(id)) {
       // Si ya está seleccionado, quitarlo
       setSelectedPerfumes(
@@ -68,6 +121,21 @@ const PerfumeSurvey: React.FC = () => {
       // Si no está seleccionado y hay menos de 3, añadirlo
       if (selectedPerfumes.length < 3) {
         setSelectedPerfumes([...selectedPerfumes, id]);
+
+        // Mostrar mensaje de guía apropiado
+        if (selectedPerfumes.length === 0) {
+          showNotification(
+            "¡Perfume seleccionado! Puedes seleccionar hasta 3 perfumes."
+          );
+        } else if (selectedPerfumes.length === 1) {
+          showNotification(
+            "¡Segundo perfume seleccionado! Puedes seleccionar uno más."
+          );
+        } else if (selectedPerfumes.length === 2) {
+          showNotification(
+            "¡Tercer perfume seleccionado! Ahora puedes enviar tu selección."
+          );
+        }
       } else {
         // Si ya hay 3 seleccionados, reemplazar el último
         const newSelection = [...selectedPerfumes];
@@ -75,7 +143,6 @@ const PerfumeSurvey: React.FC = () => {
         newSelection.push(id);
         setSelectedPerfumes(newSelection);
 
-        // Mostrar notificación
         showNotification("Se ha reemplazado el último perfume seleccionado");
       }
     }
@@ -96,19 +163,34 @@ const PerfumeSurvey: React.FC = () => {
       // Seleccionar automáticamente, reemplazando si es necesario
       if (selectedPerfumes.length < 3) {
         setSelectedPerfumes([...selectedPerfumes, customId]);
+
+        // Mostrar mensaje de guía apropiado
+        if (selectedPerfumes.length === 0) {
+          showNotification(
+            "¡Perfume añadido y seleccionado! Puedes seleccionar hasta 3 perfumes."
+          );
+        } else if (selectedPerfumes.length === 1) {
+          showNotification(
+            "¡Segundo perfume añadido! Puedes seleccionar uno más."
+          );
+        } else if (selectedPerfumes.length === 2) {
+          showNotification(
+            "¡Tercer perfume añadido! Ahora puedes enviar tu selección."
+          );
+        }
       } else {
         const newSelection = [...selectedPerfumes];
         newSelection.pop();
         newSelection.push(customId);
         setSelectedPerfumes(newSelection);
-        showNotification("Se ha reemplazado el último perfume seleccionado");
+        showNotification(
+          "Se ha añadido y reemplazado el último perfume seleccionado"
+        );
       }
 
       setNewCustomPerfume("");
       setShowAddCustom(false);
       setSearchQuery("");
-
-      showNotification("¡Perfume añadido correctamente!");
     }
   };
 
@@ -123,13 +205,20 @@ const PerfumeSurvey: React.FC = () => {
       toast.style.opacity = "0";
       toast.style.transition = "opacity 0.5s ease";
       setTimeout(() => document.body.removeChild(toast), 500);
-    }, 2000);
+    }, 3000);
   };
 
   // Iniciar la encuesta
   const handleStartSelection = (buyDecants: boolean) => {
     setWouldBuyDecants(buyDecants);
     setStep("selection");
+
+    // Enfocar el campo de búsqueda automáticamente
+    setTimeout(() => {
+      if (searchRef.current) {
+        searchRef.current.focus();
+      }
+    }, 300);
   };
 
   // Enviar la encuesta
@@ -193,6 +282,8 @@ const PerfumeSurvey: React.FC = () => {
     const [removed] = newOrder.splice(fromIndex, 1);
     newOrder.splice(toIndex, 0, removed);
     setSelectedPerfumes(newOrder);
+
+    showNotification("Has cambiado el orden de tus perfumes");
   };
 
   // Función para desplazar el carrusel horizontalmente
@@ -208,11 +299,129 @@ const PerfumeSurvey: React.FC = () => {
     }
   };
 
+  // Renderizar mensaje de guía basado en el paso actual
+  const renderGuideMessage = () => {
+    switch (guideStep) {
+      case "welcome":
+        return (
+          <div className="guide-message">
+            <InfoIcon size={20} className="guide-icon" />
+            <div className="guide-text">
+              <p>Busca y selecciona hasta 3 de tus perfumes favoritos.</p>
+              <p>
+                Si no encuentras tu perfume, puedes añadirlo escribiendo su
+                nombre.
+              </p>
+            </div>
+          </div>
+        );
+      case "select":
+        return (
+          <div className="guide-message">
+            <InfoIcon size={20} className="guide-icon" />
+            <div className="guide-text">
+              <p>
+                ¡Buen comienzo! Has seleccionado {selectedPerfumes.length}{" "}
+                perfume.
+              </p>
+              <p>
+                Puedes seleccionar hasta 2 perfumes más para completar tu top 3.
+              </p>
+            </div>
+          </div>
+        );
+      case "reorder":
+        return (
+          <div className="guide-message">
+            <InfoIcon size={20} className="guide-icon" />
+            <div className="guide-text">
+              <p>Ahora puedes ordenar tus perfumes según tu preferencia.</p>
+              <p>
+                Usa las flechas para cambiar el orden (1 = favorito, 3 = menos
+                favorito).
+              </p>
+            </div>
+          </div>
+        );
+      case "submit":
+        return (
+          <div className="guide-message guide-message-success">
+            <CheckIcon size={20} className="guide-icon" />
+            <div className="guide-text">
+              <p>¡Perfecto! Has seleccionado tus 3 perfumes favoritos.</p>
+              <p>
+                Asegúrate de que estén en el orden correcto y haz clic en
+                "Enviar selección".
+              </p>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Renderizar ayuda contextual
+  const renderHelp = () => {
+    return (
+      <div className={`help-overlay ${showHelp ? "help-visible" : ""}`}>
+        <div className="help-content">
+          <button className="help-close" onClick={() => setShowHelp(false)}>
+            <XIcon size={24} />
+          </button>
+          <h3 className="help-title">Guía de la encuesta</h3>
+
+          <div className="help-section">
+            <h4>¿Cómo seleccionar perfumes?</h4>
+            <p>
+              Haz clic en cualquier perfume para seleccionarlo. Puedes
+              seleccionar hasta 3 perfumes.
+            </p>
+          </div>
+
+          <div className="help-section">
+            <h4>¿No encuentras tu perfume?</h4>
+            <p>
+              Escribe el nombre en la barra de búsqueda y haz clic en el botón
+              "+" para añadirlo.
+            </p>
+          </div>
+
+          <div className="help-section">
+            <h4>¿Cómo cambiar el orden?</h4>
+            <p>
+              Usa las flechas arriba/abajo junto a cada perfume seleccionado
+              para cambiar su posición.
+            </p>
+          </div>
+
+          <div className="help-section">
+            <h4>¿Cómo navegar por los perfumes?</h4>
+            <p>
+              Usa las flechas izquierda/derecha para desplazarte por los
+              perfumes de cada marca.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container survey-container" ref={scrollRef}>
       <header className="survey-header">
         <h1 className="survey-title">Encuesta de Perfumes</h1>
         <p className="survey-subtitle">Selecciona tus perfumes favoritos</p>
+
+        {step === "selection" && (
+          <button
+            className="help-button"
+            onClick={() => setShowHelp(true)}
+            aria-label="Ayuda"
+          >
+            <HelpCircleIcon size={20} />
+          </button>
+        )}
       </header>
 
       {step === "intro" && (
@@ -252,25 +461,57 @@ const PerfumeSurvey: React.FC = () => {
       {step === "selection" && (
         <div className="selection-container">
           {/* Barra de progreso */}
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{
-                width: `${Math.min(100, (selectedPerfumes.length / 3) * 100)}%`,
-              }}
-            ></div>
-            <span className="progress-text">
-              {selectedPerfumes.length}/3 perfumes seleccionados
-            </span>
+          <div className="progress-container">
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${Math.min(
+                    100,
+                    (selectedPerfumes.length / 3) * 100
+                  )}%`,
+                }}
+              ></div>
+            </div>
+            <div className="progress-steps">
+              <div
+                className={`progress-step ${
+                  selectedPerfumes.length >= 1 ? "progress-step-active" : ""
+                }`}
+              >
+                <div className="progress-step-number">1</div>
+                <span className="progress-step-label">Primer perfume</span>
+              </div>
+              <div
+                className={`progress-step ${
+                  selectedPerfumes.length >= 2 ? "progress-step-active" : ""
+                }`}
+              >
+                <div className="progress-step-number">2</div>
+                <span className="progress-step-label">Segundo perfume</span>
+              </div>
+              <div
+                className={`progress-step ${
+                  selectedPerfumes.length >= 3 ? "progress-step-active" : ""
+                }`}
+              >
+                <div className="progress-step-number">3</div>
+                <span className="progress-step-label">Tercer perfume</span>
+              </div>
+            </div>
           </div>
+
+          {/* Mensaje de guía */}
+          {renderGuideMessage()}
 
           {/* Sección de búsqueda simplificada */}
           <div className="search-section">
             <div className="search-container">
               <SearchIcon size={20} className="search-icon" />
               <input
+                ref={searchRef}
                 type="text"
-                placeholder="Buscar perfume o añadir uno nuevo..."
+                placeholder="Busca un perfume o escribe uno nuevo..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="search-input"
@@ -280,6 +521,7 @@ const PerfumeSurvey: React.FC = () => {
                   <button
                     className="search-clear-button"
                     onClick={() => setSearchQuery("")}
+                    title="Borrar búsqueda"
                   >
                     <XIcon size={20} />
                   </button>
@@ -293,9 +535,28 @@ const PerfumeSurvey: React.FC = () => {
                       title="Añadir este perfume a la lista"
                     >
                       <PlusIcon size={16} />
+                      <span className="search-add-label">Añadir</span>
                     </button>
                   )}
                 </div>
+              )}
+            </div>
+            <div className="search-hint">
+              {searchQuery.length > 0 && searchQuery.length < 3 ? (
+                <span>
+                  Escribe al menos 3 caracteres para añadir un perfume
+                  personalizado
+                </span>
+              ) : searchQuery.length >= 3 ? (
+                <span>
+                  Haz clic en <strong>+ Añadir</strong> para crear un perfume
+                  personalizado
+                </span>
+              ) : (
+                <span>
+                  Escribe para buscar o añadir un perfume que no esté en la
+                  lista
+                </span>
               )}
             </div>
           </div>
@@ -305,7 +566,7 @@ const PerfumeSurvey: React.FC = () => {
             <div className="no-results">
               <div className="no-results-content">
                 <p className="no-results-title">
-                  ¿No encuentras "{searchQuery}"?
+                  No encontramos "{searchQuery}" en nuestra lista
                 </p>
                 <button
                   className="no-results-add-button"
@@ -327,14 +588,14 @@ const PerfumeSurvey: React.FC = () => {
               <h3 className="selected-title">
                 Tus perfumes seleccionados:
                 <span className="selected-subtitle">
-                  (Arrastra para reordenar)
+                  (El orden indica tu preferencia, 1 = favorito)
                 </span>
               </h3>
               <div className="selected-list">
                 {selectedPerfumes.map((id, index) => {
                   const details = getPerfumeDetails(id);
                   return (
-                    <div key={id} className="selected-item" draggable={true}>
+                    <div key={id} className="selected-item">
                       <div className="selected-rank">{index + 1}</div>
                       <div className="selected-image">
                         {id.startsWith("custom-") ? (
@@ -358,6 +619,7 @@ const PerfumeSurvey: React.FC = () => {
                           onClick={() => handleMovePerfume(index, index - 1)}
                           disabled={index === 0}
                           aria-label="Mover hacia arriba"
+                          title="Mover hacia arriba (mayor preferencia)"
                         >
                           <ChevronRightIcon className="rotate-270" size={18} />
                         </button>
@@ -366,6 +628,7 @@ const PerfumeSurvey: React.FC = () => {
                           onClick={() => handleMovePerfume(index, index + 1)}
                           disabled={index === selectedPerfumes.length - 1}
                           aria-label="Mover hacia abajo"
+                          title="Mover hacia abajo (menor preferencia)"
                         >
                           <ChevronRightIcon className="rotate-90" size={18} />
                         </button>
@@ -377,6 +640,7 @@ const PerfumeSurvey: React.FC = () => {
                             )
                           }
                           aria-label="Eliminar"
+                          title="Eliminar de la selección"
                         >
                           <XIcon size={16} />
                         </button>
@@ -390,6 +654,8 @@ const PerfumeSurvey: React.FC = () => {
 
           {/* Carruseles de perfumes por marca */}
           <div className="perfumes-by-brand">
+            <h3 className="brands-title">Selecciona tus perfumes favoritos:</h3>
+
             {sortedBrands.map((brand) => {
               const brandId = brand.replace(/\s+/g, "-").toLowerCase();
               return (
@@ -401,6 +667,7 @@ const PerfumeSurvey: React.FC = () => {
                         className="brand-nav-button"
                         onClick={() => scrollCarousel(brandId, "left")}
                         aria-label="Desplazar a la izquierda"
+                        title="Ver perfumes anteriores"
                       >
                         <ChevronLeftIcon size={16} />
                       </button>
@@ -408,6 +675,7 @@ const PerfumeSurvey: React.FC = () => {
                         className="brand-nav-button"
                         onClick={() => scrollCarousel(brandId, "right")}
                         aria-label="Desplazar a la derecha"
+                        title="Ver más perfumes"
                       >
                         <ChevronRightIcon size={16} />
                       </button>
@@ -431,6 +699,7 @@ const PerfumeSurvey: React.FC = () => {
                           style={{ width: isMobile ? "140px" : "160px" }}
                         >
                           <div
+                            id={`perfume-card-${perfume.id}`}
                             className={`perfume-card ${
                               isSelected ? "perfume-card-selected" : ""
                             }`}
@@ -451,6 +720,15 @@ const PerfumeSurvey: React.FC = () => {
                             <div className="perfume-info">
                               <p className="perfume-name">{perfume.name}</p>
                             </div>
+                            {isSelected ? (
+                              <div className="perfume-action-hint">
+                                Clic para deseleccionar
+                              </div>
+                            ) : (
+                              <div className="perfume-action-hint">
+                                Clic para seleccionar
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
@@ -465,7 +743,7 @@ const PerfumeSurvey: React.FC = () => {
           {customPerfumes.length > 0 && (
             <div className="brand-section">
               <div className="brand-header">
-                <h3 className="brand-title">Perfumes personalizados</h3>
+                <h3 className="brand-title">Tus perfumes personalizados</h3>
               </div>
 
               <div className="brand-carousel hide-scrollbar">
@@ -480,6 +758,7 @@ const PerfumeSurvey: React.FC = () => {
                       style={{ width: isMobile ? "140px" : "160px" }}
                     >
                       <div
+                        id={`perfume-card-${perfume.id}`}
                         className={`perfume-card ${
                           isSelected ? "perfume-card-selected" : ""
                         }`}
@@ -498,6 +777,15 @@ const PerfumeSurvey: React.FC = () => {
                         <div className="perfume-info">
                           <p className="perfume-name">{perfume.name}</p>
                         </div>
+                        {isSelected ? (
+                          <div className="perfume-action-hint">
+                            Clic para deseleccionar
+                          </div>
+                        ) : (
+                          <div className="perfume-action-hint">
+                            Clic para seleccionar
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -598,6 +886,9 @@ const PerfumeSurvey: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Ayuda contextual */}
+      {renderHelp()}
     </div>
   );
 };

@@ -9,6 +9,7 @@
 .survey-header {
   text-align: center;
   margin-bottom: 24px;
+  position: relative;
 }
 
 .survey-title {
@@ -21,6 +22,29 @@
 .survey-subtitle {
   font-size: 16px;
   color: #aaa;
+}
+
+.help-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: transparent;
+  border: 1px solid #555;
+  color: #aaa;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.help-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: #777;
 }
 
 /* Pantalla de introducción */
@@ -104,14 +128,17 @@
   margin-bottom: 80px;
 }
 
-/* Barra de progreso */
+/* Barra de progreso mejorada */
+.progress-container {
+  margin-bottom: 24px;
+}
+
 .progress-bar {
   height: 8px;
   background-color: #333;
   border-radius: 4px;
-  margin-bottom: 24px;
-  position: relative;
   overflow: hidden;
+  margin-bottom: 12px;
 }
 
 .progress-fill {
@@ -121,13 +148,84 @@
   transition: width 0.3s ease;
 }
 
-.progress-text {
-  position: absolute;
-  top: 12px;
-  right: 0;
-  font-size: 14px;
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 33.33%;
+}
+
+.progress-step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #333;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-bottom: 4px;
+  transition: all 0.3s ease;
+}
+
+.progress-step-active .progress-step-number {
+  background-color: #1db954;
+  color: #000;
+}
+
+.progress-step-label {
+  font-size: 12px;
+  color: #aaa;
+  transition: all 0.3s ease;
+}
+
+.progress-step-active .progress-step-label {
   color: #1db954;
   font-weight: 500;
+}
+
+/* Mensajes de guía */
+.guide-message {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid #1db954;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  border-radius: 0 8px 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: fadeIn 0.5s ease;
+}
+
+.guide-message-success {
+  border-left-color: #1db954;
+  background-color: rgba(29, 185, 84, 0.1);
+}
+
+.guide-icon {
+  color: #1db954;
+  margin-top: 2px;
+}
+
+.guide-text p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.guide-text p:first-child {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.guide-text p:last-child {
+  color: #aaa;
+  font-size: 14px;
 }
 
 /* Sección de búsqueda */
@@ -153,7 +251,7 @@
   background-color: #222;
   border: 1px solid #444;
   border-radius: 8px;
-  padding: 0 40px 0 40px;
+  padding: 0 100px 0 40px;
   color: #fff;
   font-size: 16px;
 }
@@ -188,12 +286,14 @@
   background-color: #1db954;
   color: #000;
   border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  border-radius: 4px;
+  height: 32px;
+  padding: 0 12px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -201,7 +301,13 @@
   background-color: #1ed760;
 }
 
-/* Formulario para añadir perfume personalizado */
+.search-hint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #888;
+  padding-left: 4px;
+}
+
 /* Mensaje cuando no hay resultados */
 .no-results {
   background-color: #222;
@@ -211,6 +317,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  border: 1px dashed #555;
 }
 
 .no-results-content {
@@ -280,6 +387,11 @@
   padding: 12px;
   position: relative;
   cursor: grab;
+  transition: all 0.2s ease;
+}
+
+.selected-item:hover {
+  background-color: #2a2a2a;
 }
 
 .selected-item:active {
@@ -393,6 +505,13 @@
   margin-bottom: 80px;
 }
 
+.brands-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #ddd;
+}
+
 .brand-section {
   margin-bottom: 8px;
 }
@@ -461,10 +580,11 @@
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   border: 1px solid #333;
   height: 100%;
+  transform-origin: center;
 }
 
 .perfume-card:hover {
@@ -473,10 +593,66 @@
   border-color: #444;
 }
 
+.perfume-card:active {
+  transform: scale(0.98);
+}
+
 .perfume-card-selected {
   border: none;
   background-color: #1a3a28;
   box-shadow: inset 0 0 0 2px #1db954, 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Añadir efecto de selección */
+.perfume-card-selected::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle,
+    rgba(29, 185, 84, 0.2) 0%,
+    rgba(29, 185, 84, 0) 70%
+  );
+  opacity: 0;
+  z-index: 1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Efecto de ripple al hacer clic */
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 
 .perfume-image-container {
@@ -489,6 +665,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.perfume-card-selected .perfume-image {
+  transform: scale(1.05);
 }
 
 .custom-perfume-icon {
@@ -516,6 +697,19 @@
   font-weight: 700;
   font-size: 14px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: badgeAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 2;
+}
+
+@keyframes badgeAppear {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .perfume-info {
@@ -529,6 +723,26 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
+  transition: color 0.3s ease;
+}
+
+.perfume-card-selected .perfume-name {
+  color: #1db954;
+}
+
+.perfume-action-hint {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  padding: 0 8px 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(5px);
+}
+
+.perfume-card:hover .perfume-action-hint {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Botón para enviar */
@@ -747,6 +961,73 @@
 
 .toast-icon {
   display: flex;
+}
+
+/* Ayuda contextual */
+.help-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.help-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.help-content {
+  background-color: #222;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.help-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.help-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1db954;
+}
+
+.help-section {
+  margin-bottom: 16px;
+}
+
+.help-section h4 {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #ddd;
+}
+
+.help-section p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #aaa;
 }
 
 /* Utilidades */
