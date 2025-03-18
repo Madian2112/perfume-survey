@@ -86,9 +86,14 @@ const PerfumeSurvey: React.FC = () => {
 
   const noResults = searchQuery.length > 0 && filteredPerfumes.length === 0;
 
-  // Modificar la función handleSelectPerfume para añadir un efecto visual al hacer clic
-  const handleSelectPerfume = (id: string) => {
-    // Crear efecto visual de clic
+  // Modificar la función handleSelectPerfume para evitar el desplazamiento automático
+  const handleSelectPerfume = (id: string, event?: React.MouseEvent) => {
+    // Si hay un evento, prevenir comportamiento por defecto que podría causar scroll
+    if (event) {
+      event.preventDefault();
+    }
+
+    // Crear efecto visual de clic más sutil
     const addClickEffect = (element: HTMLElement) => {
       // Crear el elemento de efecto
       const ripple = document.createElement("span");
@@ -97,13 +102,18 @@ const PerfumeSurvey: React.FC = () => {
 
       // Calcular posición y tamaño
       const rect = element.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
+      const size = Math.max(rect.width, rect.height) * 1.5;
+
+      // Posicionar en el centro para un efecto más sutil
       ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `50%`;
+      ripple.style.top = `50%`;
+      ripple.style.transform = `translate(-50%, -50% scale(0)`;
 
       // Eliminar después de la animación
       setTimeout(() => {
         ripple.remove();
-      }, 600);
+      }, 400); // Reducir tiempo de animación
     };
 
     // Encontrar el elemento de la tarjeta y aplicar el efecto
@@ -351,7 +361,7 @@ const PerfumeSurvey: React.FC = () => {
               <p>¡Perfecto! Has seleccionado tus 3 perfumes favoritos.</p>
               <p>
                 Asegúrate de que estén en el orden correcto y haz clic en
-                "Enviar selección".
+                "Enviar formulario".
               </p>
             </div>
           </div>
@@ -703,7 +713,7 @@ const PerfumeSurvey: React.FC = () => {
                             className={`perfume-card ${
                               isSelected ? "perfume-card-selected" : ""
                             }`}
-                            onClick={() => handleSelectPerfume(perfume.id)}
+                            onClick={(e) => handleSelectPerfume(perfume.id, e)}
                           >
                             <div className="perfume-image-container">
                               <img
@@ -762,7 +772,7 @@ const PerfumeSurvey: React.FC = () => {
                         className={`perfume-card ${
                           isSelected ? "perfume-card-selected" : ""
                         }`}
-                        onClick={() => handleSelectPerfume(perfume.id)}
+                        onClick={(e) => handleSelectPerfume(perfume.id, e)}
                       >
                         <div className="perfume-image-container">
                           <div className="custom-perfume-icon">

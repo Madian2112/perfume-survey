@@ -575,16 +575,16 @@
   padding: 3px;
 }
 
+/* Mejorar el efecto de selección para que sea más sutil */
 .perfume-card {
   background-color: #1a1a1a;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.25s ease-out;
   position: relative;
   border: 1px solid #333;
   height: 100%;
-  transform-origin: center;
 }
 
 .perfume-card:hover {
@@ -598,90 +598,48 @@
 }
 
 .perfume-card-selected {
-  border: none;
-  background-color: #1a3a28;
-  box-shadow: inset 0 0 0 2px #1db954, 0 4px 12px rgba(0, 0, 0, 0.2);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid #1db954;
+  background-color: rgba(29, 185, 84, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s ease-out;
 }
 
-/* Añadir efecto de selección */
+/* Eliminar el efecto de pulso agresivo */
 .perfume-card-selected::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-    circle,
-    rgba(29, 185, 84, 0.2) 0%,
-    rgba(29, 185, 84, 0) 70%
-  );
-  opacity: 0;
-  z-index: 1;
-  animation: pulse 2s ease-in-out infinite;
+  display: none;
 }
 
-@keyframes pulse {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(1.05);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-}
-
-/* Efecto de ripple al hacer clic */
+/* Simplificar el efecto de ripple */
 .ripple-effect {
   position: absolute;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(0);
-  animation: ripple 0.6s linear;
+  background-color: rgba(29, 185, 84, 0.15);
+  transform: translate(-50%, -50%) scale(0);
+  animation: subtle-ripple 0.4s ease-out forwards;
   z-index: 0;
   pointer-events: none;
 }
 
-@keyframes ripple {
+@keyframes subtle-ripple {
   to {
-    transform: scale(2);
+    transform: translate(-50%, -50%) scale(1);
     opacity: 0;
   }
-}
-
-.perfume-image-container {
-  position: relative;
-  aspect-ratio: 1;
-  background-color: #333;
 }
 
 .perfume-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.25s ease-out;
 }
 
+/* Reducir el zoom de la imagen seleccionada */
 .perfume-card-selected .perfume-image {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
-.custom-perfume-icon {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #1db954;
-  font-size: 24px;
-}
-
+/* Hacer que el badge de selección sea más sutil */
 .perfume-selected-badge {
   position: absolute;
   top: 8px;
@@ -697,25 +655,22 @@
   font-weight: 700;
   font-size: 14px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  animation: badgeAppear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: subtle-badge 0.25s ease-out;
   z-index: 2;
 }
 
-@keyframes badgeAppear {
+@keyframes subtle-badge {
   from {
-    transform: scale(0);
     opacity: 0;
+    transform: scale(0.8);
   }
   to {
-    transform: scale(1);
     opacity: 1;
+    transform: scale(1);
   }
 }
 
-.perfume-info {
-  padding: 8px;
-}
-
+/* Hacer que el cambio de color del nombre sea más sutil */
 .perfume-name {
   font-size: 14px;
   font-weight: 500;
@@ -723,11 +678,25 @@
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: center;
-  transition: color 0.3s ease;
+  transition: color 0.25s ease-out;
 }
 
 .perfume-card-selected .perfume-name {
   color: #1db954;
+}
+
+.custom-perfume-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1db954;
+  font-size: 24px;
+}
+
+.perfume-info {
+  padding: 8px;
 }
 
 .perfume-action-hint {
