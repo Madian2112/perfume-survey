@@ -47,6 +47,7 @@ const PerfumeSurvey: React.FC = () => {
   const isMobile = useMobile();
   const scrollRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const scrollPositionRef = useRef<number>(0);
 
   // Actualizar el paso de guía basado en las acciones del usuario
   useEffect(() => {
@@ -93,6 +94,9 @@ const PerfumeSurvey: React.FC = () => {
       event.preventDefault();
     }
 
+    // Guardar la posición actual del scroll antes de modificar el estado
+    scrollPositionRef.current = window.scrollY;
+
     // Crear efecto visual de clic más sutil
     const addClickEffect = (element: HTMLElement) => {
       // Crear el elemento de efecto
@@ -108,7 +112,7 @@ const PerfumeSurvey: React.FC = () => {
       ripple.style.width = ripple.style.height = `${size}px`;
       ripple.style.left = `50%`;
       ripple.style.top = `50%`;
-      ripple.style.transform = `translate(-50%, -50% scale(0)`;
+      ripple.style.transform = `translate(-50%, -50%) scale(0)`;
 
       // Eliminar después de la animación
       setTimeout(() => {
@@ -156,11 +160,22 @@ const PerfumeSurvey: React.FC = () => {
         showNotification("Se ha reemplazado el último perfume seleccionado");
       }
     }
+
+    // Restaurar la posición del scroll después de que el DOM se actualice
+    setTimeout(() => {
+      window.scrollTo({
+        top: scrollPositionRef.current,
+        behavior: "auto", // Usar "auto" en lugar de "smooth" para evitar animaciones
+      });
+    }, 0);
   };
 
   // Añadir perfume personalizado
   const handleAddCustomPerfume = () => {
     if (newCustomPerfume.trim()) {
+      // Guardar la posición actual del scroll
+      scrollPositionRef.current = window.scrollY;
+
       const customId = `custom-${Date.now()}`;
       const newPerfume: CustomPerfume = {
         id: customId,
@@ -201,6 +216,14 @@ const PerfumeSurvey: React.FC = () => {
       setNewCustomPerfume("");
       setShowAddCustom(false);
       setSearchQuery("");
+
+      // Restaurar la posición del scroll después de que el DOM se actualice
+      setTimeout(() => {
+        window.scrollTo({
+          top: scrollPositionRef.current,
+          behavior: "auto",
+        });
+      }, 0);
     }
   };
 
@@ -288,12 +311,23 @@ const PerfumeSurvey: React.FC = () => {
   const handleMovePerfume = (fromIndex: number, toIndex: number) => {
     if (toIndex < 0 || toIndex >= selectedPerfumes.length) return;
 
+    // Guardar la posición actual del scroll
+    scrollPositionRef.current = window.scrollY;
+
     const newOrder = [...selectedPerfumes];
     const [removed] = newOrder.splice(fromIndex, 1);
     newOrder.splice(toIndex, 0, removed);
     setSelectedPerfumes(newOrder);
 
     showNotification("Has cambiado el orden de tus perfumes");
+
+    // Restaurar la posición del scroll después de que el DOM se actualice
+    setTimeout(() => {
+      window.scrollTo({
+        top: scrollPositionRef.current,
+        behavior: "auto",
+      });
+    }, 0);
   };
 
   // Función para desplazar el carrusel horizontalmente
@@ -317,7 +351,10 @@ const PerfumeSurvey: React.FC = () => {
           <div className="guide-message">
             <InfoIcon size={20} className="guide-icon" />
             <div className="guide-text">
-              <p>Busca y selecciona hasta 3 de tus perfumes favoritos.</p>
+              <p>
+                Desliza hacia abajo y selecciona hasta 3 de tus perfumes
+                favoritos.
+              </p>
               <p>
                 Si no encuentras tu perfume, puedes añadirlo escribiendo su
                 nombre.
@@ -361,7 +398,7 @@ const PerfumeSurvey: React.FC = () => {
               <p>¡Perfecto! Has seleccionado tus 3 perfumes favoritos.</p>
               <p>
                 Asegúrate de que estén en el orden correcto y haz clic en
-                "Enviar formulario".
+                "Enviar selección".
               </p>
             </div>
           </div>
@@ -592,75 +629,100 @@ const PerfumeSurvey: React.FC = () => {
             </div>
           )}
 
-          {/* Perfumes seleccionados */}
-          {selectedPerfumes.length > 0 && (
-            <div className="selected-perfumes">
-              <h3 className="selected-title">
-                Tus perfumes seleccionados:
-                <span className="selected-subtitle">
-                  (El orden indica tu preferencia, 1 = favorito)
-                </span>
-              </h3>
-              <div className="selected-list">
-                {selectedPerfumes.map((id, index) => {
-                  const details = getPerfumeDetails(id);
-                  return (
-                    <div key={id} className="selected-item">
-                      <div className="selected-rank">{index + 1}</div>
-                      <div className="selected-image">
-                        {id.startsWith("custom-") ? (
-                          <div className="selected-custom-icon">
-                            <PlusIcon size={20} />
-                          </div>
-                        ) : (
-                          <img
-                            src={details.image || "/placeholder.svg"}
-                            alt={details.name}
-                          />
-                        )}
+          {/* Perfumes seleccionados - Siempre visible con altura mínima */}
+          <div className="selected-perfumes-container">
+            {selectedPerfumes.length > 0 ? (
+              <div className="selected-perfumes">
+                <h3 className="selected-title">
+                  Tus perfumes seleccionados:
+                  <span className="selected-subtitle">
+                    (El orden indica tu preferencia, 1 = favorito)
+                  </span>
+                </h3>
+                <div className="selected-list">
+                  {selectedPerfumes.map((id, index) => {
+                    const details = getPerfumeDetails(id);
+                    return (
+                      <div key={id} className="selected-item">
+                        <div className="selected-rank">{index + 1}</div>
+                        <div className="selected-image">
+                          {id.startsWith("custom-") ? (
+                            <div className="selected-custom-icon">
+                              <PlusIcon size={20} />
+                            </div>
+                          ) : (
+                            <img
+                              src={details.image || "/placeholder.svg"}
+                              alt={details.name}
+                            />
+                          )}
+                        </div>
+                        <div className="selected-info">
+                          <p className="selected-name">{details.name}</p>
+                          <p className="selected-brand">{details.brand}</p>
+                        </div>
+                        <div className="selected-actions">
+                          <button
+                            className="selected-move-button"
+                            onClick={() => handleMovePerfume(index, index - 1)}
+                            disabled={index === 0}
+                            aria-label="Mover hacia arriba"
+                            title="Mover hacia arriba (mayor preferencia)"
+                          >
+                            <ChevronRightIcon
+                              className="rotate-270"
+                              size={18}
+                            />
+                          </button>
+                          <button
+                            className="selected-move-button"
+                            onClick={() => handleMovePerfume(index, index + 1)}
+                            disabled={index === selectedPerfumes.length - 1}
+                            aria-label="Mover hacia abajo"
+                            title="Mover hacia abajo (menor preferencia)"
+                          >
+                            <ChevronRightIcon className="rotate-90" size={18} />
+                          </button>
+                          <button
+                            className="selected-remove-button"
+                            onClick={() => {
+                              // Guardar posición de scroll antes de eliminar
+                              scrollPositionRef.current = window.scrollY;
+                              setSelectedPerfumes(
+                                selectedPerfumes.filter((_, i) => i !== index)
+                              );
+                              // Restaurar posición después de actualizar el DOM
+                              setTimeout(() => {
+                                window.scrollTo({
+                                  top: scrollPositionRef.current,
+                                  behavior: "auto",
+                                });
+                              }, 0);
+                            }}
+                            aria-label="Eliminar"
+                            title="Eliminar de la selección"
+                          >
+                            <XIcon size={16} />
+                          </button>
+                        </div>
                       </div>
-                      <div className="selected-info">
-                        <p className="selected-name">{details.name}</p>
-                        <p className="selected-brand">{details.brand}</p>
-                      </div>
-                      <div className="selected-actions">
-                        <button
-                          className="selected-move-button"
-                          onClick={() => handleMovePerfume(index, index - 1)}
-                          disabled={index === 0}
-                          aria-label="Mover hacia arriba"
-                          title="Mover hacia arriba (mayor preferencia)"
-                        >
-                          <ChevronRightIcon className="rotate-270" size={18} />
-                        </button>
-                        <button
-                          className="selected-move-button"
-                          onClick={() => handleMovePerfume(index, index + 1)}
-                          disabled={index === selectedPerfumes.length - 1}
-                          aria-label="Mover hacia abajo"
-                          title="Mover hacia abajo (menor preferencia)"
-                        >
-                          <ChevronRightIcon className="rotate-90" size={18} />
-                        </button>
-                        <button
-                          className="selected-remove-button"
-                          onClick={() =>
-                            setSelectedPerfumes(
-                              selectedPerfumes.filter((_, i) => i !== index)
-                            )
-                          }
-                          aria-label="Eliminar"
-                          title="Eliminar de la selección"
-                        >
-                          <XIcon size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="selected-perfumes selected-perfumes-empty">
+                <h3 className="selected-title">Tus perfumes seleccionados:</h3>
+                <div className="selected-empty-message">
+                  <InfoIcon size={24} className="selected-empty-icon" />
+                  <p>
+                    Aún no has seleccionado ningún perfume. Haz clic en los
+                    perfumes que te gusten para añadirlos aquí.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Carruseles de perfumes por marca */}
           <div className="perfumes-by-brand">
