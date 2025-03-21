@@ -8,8 +8,8 @@ export interface Perfume {
 export const perfumes: Perfume[] = [
   {
     id: "1",
-    name: "Le Male Le Parfum",
-    brand: "Jean Paul Gaultier",
+    name: "Otro",
+    brand: "Chanel",
     image: "images/le_male_le_parfum.jpg",
   },
   {
@@ -77,5 +77,59 @@ export const perfumes: Perfume[] = [
     name: "Aventus",
     brand: "Creed",
     image: "/placeholder.svg",
+  },
+  {
+    id: "13",
+    name: "Le Male Le Parfum",
+    brand: "Jean Paul Gaultier",
+    image: "images/Jean_Paul_Gaultier/le_male_le_parfum.jpg",
+  },
+  {
+    id: "14",
+    name: "Le Male Elixir",
+    brand: "Jean Paul Gaultier",
+    image: "images/Jean_Paul_Gaultier/le_male_elixir.jpg",
+  },
+  {
+    id: "15",
+    name: "Le Male",
+    brand: "Jean Paul Gaultier",
+    image: "images/Jean_Paul_Gaultier/le_male.jpg",
+  },
+  {
+    id: "16",
+    name: "Le Beau Le Parfum",
+    brand: "Jean Paul Gaultier",
+    image: "images/Jean_Paul_Gaultier/le_beau_le_parfum.jpg",
+  },
+  {
+    id: "17",
+    name: "Le Beau EDT",
+    brand: "Jean Paul Gaultier",
+    image: "images/Jean_Paul_Gaultier/le_beau_edt.jpg",
+  },
+  {
+    id: "18",
+    name: "Ultra Male",
+    brand: "Jean Paul Gaultier",
+    image: "images/Jean_Paul_Gaultier/ultra_male.jpg",
+  },
+  {
+    id: "19",
+    name: "Scandal Pour Homme",
+    brand: "Jean Paul Gaultier",
+    image: "images/Jean_Paul_Gaultier/scandar_pour_homme.jpg",
+  },
+  {
+    id: "20",
+    name: "Scandal Pour Homme Absolu Parfum",
+    brand: "Jean Paul Gaultier",
+    image: "images/Jean_Paul_Gaultier/scandar_pour_homme._absolu.jpg",
+  },
+  {
+    id: "21",
+    name: "Scandal Him EDT",
+    brand: "Jean Paul Gaultier",
+    image: "images/Jean_Paul_Gaultier/scandar_him_edt.jpg",
   },
 ];

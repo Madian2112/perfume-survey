@@ -157,7 +157,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 33.33%;
+  width: 50%;
 }
 
 .progress-step-number {
@@ -1052,5 +1052,423 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+/* Botón flotante para añadir perfume */
+.add-perfume-floating-button-container {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  z-index: 10;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.add-perfume-floating-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 24px;
+  background-color: #1db954;
+  color: #000;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.add-perfume-floating-button::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 24px;
+  background: linear-gradient(45deg, #1db954, #4caf50);
+  z-index: -1;
+  animation: pulse 2s infinite;
+}
+
+.add-perfume-floating-button:hover {
+  background-color: #1ed760;
+  transform: translateY(-2px);
+}
+
+.add-perfume-button-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* Modal para añadir perfume */
+.add-perfume-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+
+.add-perfume-modal {
+  background-color: #222;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  animation: modalSlideUp 0.3s ease;
+  border: 1px solid #333;
+}
+
+.add-perfume-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.add-perfume-modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.add-perfume-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1db954;
+}
+
+.add-perfume-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.add-perfume-modal-input {
+  height: 48px;
+  background-color: #333;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 0 16px;
+  color: #fff;
+  font-size: 16px;
+}
+
+.add-perfume-modal-input:focus {
+  outline: none;
+  border-color: #1db954;
+  box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.2);
+}
+
+.add-perfume-modal-button {
+  height: 48px;
+  background-color: #1db954;
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-perfume-modal-button:hover:not(:disabled) {
+  background-color: #1ed760;
+}
+
+.add-perfume-modal-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ajustar la posición del botón flotante en pantallas pequeñas */
+@media (max-width: 768px) {
+  .add-perfume-floating-button-container {
+    bottom: 90px;
+    right: 16px;
+  }
+
+  /* Hacer el botón más compacto en móviles */
+  .add-perfume-floating-button {
+    padding: 0 12px;
+  }
+}
+
+/* Estilos para la pantalla de clasificación */
+.ranking-container {
+  max-width: 800px;
+  margin: 0 auto 80px;
+  padding: 16px;
+  animation: fadeIn 0.5s ease;
+}
+
+.ranking-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.ranking-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: #1db954;
+}
+
+.ranking-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1db954;
+  margin-bottom: 8px;
+}
+
+.ranking-subtitle {
+  font-size: 16px;
+  color: #aaa;
+}
+
+.ranking-instructions {
+  margin-bottom: 24px;
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #333;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ranking-item:hover {
+  background-color: #222;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.ranking-position {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 16px;
+}
+
+.ranking-number {
+  width: 32px;
+  height: 32px;
+  background-color: #1db954;
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+
+.ranking-medal {
+  font-size: 24px;
+  height: 24px;
+}
+
+.ranking-image {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-right: 16px;
+  background-color: #333;
+}
+
+.ranking-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ranking-custom-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1db954;
+  background-color: #333;
+  font-size: 28px;
+}
+
+.ranking-info {
+  flex: 1;
+}
+
+.ranking-name {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.ranking-brand {
+  font-size: 14px;
+  color: #aaa;
+}
+
+.ranking-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ranking-move-button {
+  width: 40px;
+  height: 40px;
+  background-color: #333;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.ranking-move-button:hover:not(:disabled) {
+  background-color: #444;
+  color: #1db954;
+}
+
+.ranking-move-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.ranking-actions-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.ranking-back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  background-color: transparent;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 24px;
+  padding: 0 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ranking-back-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #777;
+}
+
+.ranking-submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 48px;
+  background-color: #1db954;
+  color: #000;
+  border: none;
+  border-radius: 24px;
+  padding: 0 24px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  max-width: 300px;
+}
+
+.ranking-submit-button:hover {
+  background-color: #1ed760;
+}
+
+/* Responsive para la pantalla de clasificación */
+@media (max-width: 640px) {
+  .ranking-item {
+    padding: 12px;
+  }
+
+  .ranking-image {
+    width: 48px;
+    height: 48px;
+    margin-right: 12px;
+  }
+
+  .ranking-name {
+    font-size: 16px;
+  }
+
+  .ranking-brand {
+    font-size: 12px;
+  }
+
+  .ranking-move-button {
+    width: 36px;
+    height: 36px;
   }
 }

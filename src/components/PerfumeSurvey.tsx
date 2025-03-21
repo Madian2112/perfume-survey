@@ -17,6 +17,9 @@ import {
   ThumbsUpIcon,
   ThumbsDownIcon,
   HelpCircleIcon,
+  ArrowUpIcon,
+  ArrowDownIcon,
+  ListOrderedIcon,
 } from "../icons/Icons";
 
 interface CustomPerfume {
@@ -25,7 +28,7 @@ interface CustomPerfume {
   isCustom: boolean;
 }
 
-type SurveyStep = "intro" | "selection" | "complete";
+type SurveyStep = "intro" | "selection" | "ranking" | "complete";
 type GuideStep =
   | "welcome"
   | "search"
@@ -48,6 +51,10 @@ const PerfumeSurvey: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const scrollPositionRef = useRef<number>(0);
+  const [showTitle, setShowTitle] = useState(true);
+  // Agregar estado para el modal flotante
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [modalPerfumeName, setModalPerfumeName] = useState<string>("");
 
   // Actualizar el paso de guía basado en las acciones del usuario
   useEffect(() => {
@@ -137,27 +144,12 @@ const PerfumeSurvey: React.FC = () => {
         setSelectedPerfumes([...selectedPerfumes, id]);
 
         // Mostrar mensaje de guía apropiado
-        if (selectedPerfumes.length === 0) {
-          showNotification(
-            "¡Perfume seleccionado! Puedes seleccionar hasta 3 perfumes."
-          );
-        } else if (selectedPerfumes.length === 1) {
-          showNotification(
-            "¡Segundo perfume seleccionado! Puedes seleccionar uno más."
-          );
-        } else if (selectedPerfumes.length === 2) {
-          showNotification(
-            "¡Tercer perfume seleccionado! Ahora puedes enviar tu selección."
-          );
-        }
       } else {
         // Si ya hay 3 seleccionados, reemplazar el último
         const newSelection = [...selectedPerfumes];
         newSelection.pop();
         newSelection.push(id);
         setSelectedPerfumes(newSelection);
-
-        showNotification("Se ha reemplazado el último perfume seleccionado");
       }
     }
 
@@ -171,15 +163,17 @@ const PerfumeSurvey: React.FC = () => {
   };
 
   // Añadir perfume personalizado
-  const handleAddCustomPerfume = () => {
-    if (newCustomPerfume.trim()) {
+  const handleAddCustomPerfume = (customName?: string) => {
+    // Usar el parámetro si se proporciona, o usar el estado newCustomPerfume
+    const perfumeName = customName || newCustomPerfume;
+    if (perfumeName.trim()) {
       // Guardar la posición actual del scroll
       scrollPositionRef.current = window.scrollY;
 
       const customId = `custom-${Date.now()}`;
       const newPerfume: CustomPerfume = {
         id: customId,
-        name: newCustomPerfume.trim(),
+        name: perfumeName.trim(),
         isCustom: true,
       };
 
@@ -191,17 +185,11 @@ const PerfumeSurvey: React.FC = () => {
 
         // Mostrar mensaje de guía apropiado
         if (selectedPerfumes.length === 0) {
-          showNotification(
-            "¡Perfume añadido y seleccionado! Puedes seleccionar hasta 3 perfumes."
-          );
+          showNotification("¡Perfume añadido y seleccionado!");
         } else if (selectedPerfumes.length === 1) {
-          showNotification(
-            "¡Segundo perfume añadido! Puedes seleccionar uno más."
-          );
+          showNotification("¡Segundo perfume añadido!");
         } else if (selectedPerfumes.length === 2) {
-          showNotification(
-            "¡Tercer perfume añadido! Ahora puedes enviar tu selección."
-          );
+          showNotification("¡Tercer perfume añadido!");
         }
       } else {
         const newSelection = [...selectedPerfumes];
@@ -224,6 +212,15 @@ const PerfumeSurvey: React.FC = () => {
           behavior: "auto",
         });
       }, 0);
+    }
+  };
+
+  // Agregar función para manejar la adición desde el modal
+  const handleAddFromModal = () => {
+    if (modalPerfumeName.trim()) {
+      handleAddCustomPerfume(modalPerfumeName);
+      setModalPerfumeName("");
+      setShowAddModal(false);
     }
   };
 
@@ -252,6 +249,17 @@ const PerfumeSurvey: React.FC = () => {
         searchRef.current.focus();
       }
     }, 300);
+  };
+
+  // Continuar a la pantalla de clasificación
+  const handleContinueToRanking = () => {
+    if (selectedPerfumes.length > 0) {
+      setStep("ranking");
+      // Scroll al inicio de la página
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      showNotification("Selecciona al menos un perfume para continuar");
+    }
   };
 
   // Enviar la encuesta
@@ -319,8 +327,6 @@ const PerfumeSurvey: React.FC = () => {
     newOrder.splice(toIndex, 0, removed);
     setSelectedPerfumes(newOrder);
 
-    showNotification("Has cambiado el orden de tus perfumes");
-
     // Restaurar la posición del scroll después de que el DOM se actualice
     setTimeout(() => {
       window.scrollTo({
@@ -351,10 +357,7 @@ const PerfumeSurvey: React.FC = () => {
           <div className="guide-message">
             <InfoIcon size={20} className="guide-icon" />
             <div className="guide-text">
-              <p>
-                Desliza hacia abajo y selecciona hasta 3 de tus perfumes
-                favoritos.
-              </p>
+              <p>Busca y selecciona hasta 3 de tus perfumes favoritos.</p>
               <p>
                 Si no encuentras tu perfume, puedes añadirlo escribiendo su
                 nombre.
@@ -396,10 +399,7 @@ const PerfumeSurvey: React.FC = () => {
             <CheckIcon size={20} className="guide-icon" />
             <div className="guide-text">
               <p>¡Perfecto! Has seleccionado tus 3 perfumes favoritos.</p>
-              <p>
-                Asegúrate de que estén en el orden correcto y haz clic en
-                "Enviar selección".
-              </p>
+              <p>Haz clic en "Continuar" para clasificarlos del 1 al 3.</p>
             </div>
           </div>
         );
@@ -456,20 +456,27 @@ const PerfumeSurvey: React.FC = () => {
 
   return (
     <div className="container survey-container" ref={scrollRef}>
-      <header className="survey-header">
-        <h1 className="survey-title">Encuesta de Perfumes</h1>
-        <p className="survey-subtitle">Selecciona tus perfumes favoritos</p>
+      {showTitle && (
+        <header className="survey-header">
+          <h1 className="survey-title">Encuesta de Perfumes</h1>
+          <p className="survey-subtitle">
+            {step === "intro" && "Selecciona tus perfumes favoritos"}
+            {step === "selection" && "Selecciona tus perfumes favoritos"}
+            {step === "ranking" && "Clasifica tus perfumes del 1 al 3"}
+            {step === "complete" && "¡Gracias por tu participación!"}
+          </p>
 
-        {step === "selection" && (
-          <button
-            className="help-button"
-            onClick={() => setShowHelp(true)}
-            aria-label="Ayuda"
-          >
-            <HelpCircleIcon size={20} />
-          </button>
-        )}
-      </header>
+          {(step === "selection" || step === "ranking") && (
+            <button
+              className="help-button"
+              onClick={() => setShowHelp(true)}
+              aria-label="Ayuda"
+            >
+              <HelpCircleIcon size={20} />
+            </button>
+          )}
+        </header>
+      )}
 
       {step === "intro" && (
         <div className="intro-container">
@@ -507,47 +514,6 @@ const PerfumeSurvey: React.FC = () => {
 
       {step === "selection" && (
         <div className="selection-container">
-          {/* Barra de progreso */}
-          <div className="progress-container">
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${Math.min(
-                    100,
-                    (selectedPerfumes.length / 3) * 100
-                  )}%`,
-                }}
-              ></div>
-            </div>
-            <div className="progress-steps">
-              <div
-                className={`progress-step ${
-                  selectedPerfumes.length >= 1 ? "progress-step-active" : ""
-                }`}
-              >
-                <div className="progress-step-number">1</div>
-                <span className="progress-step-label">Primer perfume</span>
-              </div>
-              <div
-                className={`progress-step ${
-                  selectedPerfumes.length >= 2 ? "progress-step-active" : ""
-                }`}
-              >
-                <div className="progress-step-number">2</div>
-                <span className="progress-step-label">Segundo perfume</span>
-              </div>
-              <div
-                className={`progress-step ${
-                  selectedPerfumes.length >= 3 ? "progress-step-active" : ""
-                }`}
-              >
-                <div className="progress-step-number">3</div>
-                <span className="progress-step-label">Tercer perfume</span>
-              </div>
-            </div>
-          </div>
-
           {/* Mensaje de guía */}
           {renderGuideMessage()}
 
@@ -575,10 +541,7 @@ const PerfumeSurvey: React.FC = () => {
                   {searchQuery.length > 2 && (
                     <button
                       className="search-add-button"
-                      onClick={() => {
-                        setNewCustomPerfume(searchQuery);
-                        handleAddCustomPerfume();
-                      }}
+                      onClick={() => handleAddCustomPerfume(searchQuery)}
                       title="Añadir este perfume a la lista"
                     >
                       <PlusIcon size={16} />
@@ -617,10 +580,7 @@ const PerfumeSurvey: React.FC = () => {
                 </p>
                 <button
                   className="no-results-add-button"
-                  onClick={() => {
-                    setNewCustomPerfume(searchQuery);
-                    handleAddCustomPerfume();
-                  }}
+                  onClick={() => handleAddCustomPerfume(searchQuery)}
                 >
                   <PlusIcon size={16} />
                   <span>Añadir a mis perfumes</span>
@@ -628,101 +588,6 @@ const PerfumeSurvey: React.FC = () => {
               </div>
             </div>
           )}
-
-          {/* Perfumes seleccionados - Siempre visible con altura mínima */}
-          <div className="selected-perfumes-container">
-            {selectedPerfumes.length > 0 ? (
-              <div className="selected-perfumes">
-                <h3 className="selected-title">
-                  Tus perfumes seleccionados:
-                  <span className="selected-subtitle">
-                    (El orden indica tu preferencia, 1 = favorito)
-                  </span>
-                </h3>
-                <div className="selected-list">
-                  {selectedPerfumes.map((id, index) => {
-                    const details = getPerfumeDetails(id);
-                    return (
-                      <div key={id} className="selected-item">
-                        <div className="selected-rank">{index + 1}</div>
-                        <div className="selected-image">
-                          {id.startsWith("custom-") ? (
-                            <div className="selected-custom-icon">
-                              <PlusIcon size={20} />
-                            </div>
-                          ) : (
-                            <img
-                              src={details.image || "/placeholder.svg"}
-                              alt={details.name}
-                            />
-                          )}
-                        </div>
-                        <div className="selected-info">
-                          <p className="selected-name">{details.name}</p>
-                          <p className="selected-brand">{details.brand}</p>
-                        </div>
-                        <div className="selected-actions">
-                          <button
-                            className="selected-move-button"
-                            onClick={() => handleMovePerfume(index, index - 1)}
-                            disabled={index === 0}
-                            aria-label="Mover hacia arriba"
-                            title="Mover hacia arriba (mayor preferencia)"
-                          >
-                            <ChevronRightIcon
-                              className="rotate-270"
-                              size={18}
-                            />
-                          </button>
-                          <button
-                            className="selected-move-button"
-                            onClick={() => handleMovePerfume(index, index + 1)}
-                            disabled={index === selectedPerfumes.length - 1}
-                            aria-label="Mover hacia abajo"
-                            title="Mover hacia abajo (menor preferencia)"
-                          >
-                            <ChevronRightIcon className="rotate-90" size={18} />
-                          </button>
-                          <button
-                            className="selected-remove-button"
-                            onClick={() => {
-                              // Guardar posición de scroll antes de eliminar
-                              scrollPositionRef.current = window.scrollY;
-                              setSelectedPerfumes(
-                                selectedPerfumes.filter((_, i) => i !== index)
-                              );
-                              // Restaurar posición después de actualizar el DOM
-                              setTimeout(() => {
-                                window.scrollTo({
-                                  top: scrollPositionRef.current,
-                                  behavior: "auto",
-                                });
-                              }, 0);
-                            }}
-                            aria-label="Eliminar"
-                            title="Eliminar de la selección"
-                          >
-                            <XIcon size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <div className="selected-perfumes selected-perfumes-empty">
-                <h3 className="selected-title">Tus perfumes seleccionados:</h3>
-                <div className="selected-empty-message">
-                  <InfoIcon size={24} className="selected-empty-icon" />
-                  <p>
-                    Aún no has seleccionado ningún perfume. Haz clic en los
-                    perfumes que te gusten para añadirlos aquí.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Carruseles de perfumes por marca */}
           <div className="perfumes-by-brand">
@@ -785,7 +650,7 @@ const PerfumeSurvey: React.FC = () => {
                               />
                               {isSelected && (
                                 <div className="perfume-selected-badge">
-                                  <span>{selectionIndex + 1}</span>
+                                  <CheckIcon size={12} />
                                 </div>
                               )}
                             </div>
@@ -842,7 +707,7 @@ const PerfumeSurvey: React.FC = () => {
                           </div>
                           {isSelected && (
                             <div className="perfume-selected-badge">
-                              <span>{selectionIndex + 1}</span>
+                              <CheckIcon size={12} />
                             </div>
                           )}
                         </div>
@@ -866,21 +731,182 @@ const PerfumeSurvey: React.FC = () => {
             </div>
           )}
 
-          {/* Botón para enviar */}
+          {/* Botón para continuar a la clasificación */}
           <div className="floating-button-container">
             <button
               className={`floating-button ${
-                selectedPerfumes.length === 3 ? "floating-button-ready" : ""
+                selectedPerfumes.length > 0 ? "floating-button-ready" : ""
               }`}
-              onClick={handleSubmit}
-              disabled={selectedPerfumes.length < 1}
+              onClick={() => {
+                handleContinueToRanking();
+                setShowTitle(false);
+              }}
+              disabled={selectedPerfumes.length === 0}
             >
               {selectedPerfumes.length === 0
                 ? "Selecciona al menos un perfume"
-                : selectedPerfumes.length < 3
-                ? `Enviar selección (${selectedPerfumes.length}/3)`
-                : "Enviar selección"}
+                : `Continuar con ${selectedPerfumes.length} perfume${
+                    selectedPerfumes.length > 1 ? "s" : ""
+                  }`}
               <ArrowRightIcon size={20} className="floating-button-icon" />
+            </button>
+          </div>
+          {step === "selection" && (
+            <>
+              {/* Botón flotante para añadir perfume - Más descriptivo */}
+              <div className="add-perfume-floating-button-container">
+                <button
+                  className="add-perfume-floating-button"
+                  onClick={() => setShowAddModal(true)}
+                  aria-label="Añadir perfume personalizado"
+                  title="Añadir un perfume que no está en la lista"
+                >
+                  <PlusIcon size={20} />
+                  <span className="add-perfume-button-text">
+                    Añadir perfume
+                  </span>
+                </button>
+              </div>
+
+              {/* Modal para añadir perfume */}
+              {showAddModal && (
+                <div className="add-perfume-modal-overlay">
+                  <div className="add-perfume-modal">
+                    <button
+                      className="add-perfume-modal-close"
+                      onClick={() => setShowAddModal(false)}
+                    >
+                      <XIcon size={20} />
+                    </button>
+                    <h3 className="add-perfume-modal-title">
+                      Añadir perfume personalizado
+                    </h3>
+                    <div className="add-perfume-modal-content">
+                      <input
+                        type="text"
+                        className="add-perfume-modal-input"
+                        placeholder="Nombre del perfume..."
+                        value={modalPerfumeName}
+                        onChange={(e) => setModalPerfumeName(e.target.value)}
+                        autoFocus
+                      />
+                      <button
+                        className="add-perfume-modal-button"
+                        onClick={handleAddFromModal}
+                        disabled={!modalPerfumeName.trim()}
+                      >
+                        <PlusIcon size={16} />
+                        <span>Añadir perfume</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {step === "ranking" && (
+        <div className="ranking-container">
+          <div className="ranking-header">
+            <div className="ranking-icon">
+              <ListOrderedIcon size={32} />
+            </div>
+            <h2 className="ranking-title">Clasifica tus perfumes favoritos</h2>
+            <p className="ranking-subtitle">
+              Ordena tus perfumes del 1 al {selectedPerfumes.length}, donde 1 es
+              tu favorito absoluto
+            </p>
+          </div>
+
+          <div className="ranking-instructions">
+            <div className="guide-message">
+              <InfoIcon size={20} className="guide-icon" />
+              <div className="guide-text">
+                <p>Ordena los perfumes según tu preferencia.</p>
+                <p>
+                  También puedes usar los botones de flecha para mover cada
+                  perfume hacia arriba o hacia abajo.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="ranking-list">
+            {selectedPerfumes.map((id, index) => {
+              const details = getPerfumeDetails(id);
+              return (
+                <div key={id} className="ranking-item">
+                  <div className="ranking-position">
+                    <div className="ranking-number">{index + 1}</div>
+                    {/* <div className="ranking-medal">
+                      {index === 0 && (
+                        <span className="ranking-medal-gold">🥇</span>
+                      )}
+                      {index === 1 && (
+                        <span className="ranking-medal-silver">🥈</span>
+                      )}
+                      {index === 2 && (
+                        <span className="ranking-medal-bronze">🥉</span>
+                      )}
+                    </div> */}
+                  </div>
+                  <div className="ranking-image">
+                    {id.startsWith("custom-") ? (
+                      <div className="ranking-custom-icon">
+                        <PlusIcon size={24} />
+                      </div>
+                    ) : (
+                      <img
+                        src={details.image || "/placeholder.svg"}
+                        alt={details.name}
+                      />
+                    )}
+                  </div>
+                  <div className="ranking-info">
+                    <p className="ranking-name">{details.name}</p>
+                    <p className="ranking-brand">{details.brand}</p>
+                  </div>
+                  <div className="ranking-actions">
+                    <button
+                      className="ranking-move-button"
+                      onClick={() => handleMovePerfume(index, index - 1)}
+                      disabled={index === 0}
+                      aria-label="Mover hacia arriba"
+                      title="Mover hacia arriba (mayor preferencia)"
+                    >
+                      <ArrowUpIcon size={18} />
+                    </button>
+                    <button
+                      className="ranking-move-button"
+                      onClick={() => handleMovePerfume(index, index + 1)}
+                      disabled={index === selectedPerfumes.length - 1}
+                      aria-label="Mover hacia abajo"
+                      title="Mover hacia abajo (menor preferencia)"
+                    >
+                      <ArrowDownIcon size={18} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="ranking-actions-container">
+            <button
+              className="ranking-back-button"
+              onClick={() => {
+                setStep("selection");
+                setShowTitle(true);
+              }}
+            >
+              <ChevronLeftIcon size={20} />
+              <span>Volver</span>
+            </button>
+            <button className="ranking-submit-button" onClick={handleSubmit}>
+              <span>Enviar formulario</span>
+              <ArrowRightIcon size={20} />
             </button>
           </div>
         </div>
@@ -944,18 +970,6 @@ const PerfumeSurvey: React.FC = () => {
               })}
             </div>
           </div>
-
-          <button
-            className="restart-button"
-            onClick={() => {
-              setSelectedPerfumes([]);
-              setCustomPerfumes([]);
-              setSearchQuery("");
-              setStep("intro");
-            }}
-          >
-            Realizar otra encuesta
-          </button>
         </div>
       )}
 
